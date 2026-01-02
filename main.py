@@ -22,7 +22,7 @@ TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
 # ===============================
 # TikTok verification content
 # ===============================
-TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=J4r0wMu1TxBLLXJBn410CLDvoKx2KxJb"
+TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=KlnxUsN93VOBSrnPvaq7sWCP5RJhkgGA"
 
 # ===============================
 # APP
