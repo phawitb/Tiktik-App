@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse, PlainTextResponse
 CLIENT_KEY = "awuhdxqicla70byg"
 CLIENT_SECRET = "PTv0jbHJiGyo81XdNf8jGqsy5FmsB0YY"
 
-APP_BASE_URL = "https://tiktok-mini.onrender.com"   # ← เปลี่ยนเป็นของคุณ
+APP_BASE_URL = "https://tiktik-app.onrender.com"   # ← เปลี่ยนเป็นของคุณ
 REDIRECT_URI = APP_BASE_URL + "/callback"
 
 SCOPES = "video.upload"  # Draft upload (แนะนำ)
