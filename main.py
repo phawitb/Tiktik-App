@@ -10,15 +10,25 @@ from fastapi.responses import RedirectResponse, HTMLResponse, PlainTextResponse
 CLIENT_KEY = "awuhdxqicla70byg"
 CLIENT_SECRET = "PTv0jbHJiGyo81XdNf8jGqsy5FmsB0YY"
 
-APP_BASE_URL = "https://tiktik-app.onrender.com"   # ← เปลี่ยนเป็นของคุณ
+APP_BASE_URL = "https://tiktik-app.onrender.com"
 REDIRECT_URI = APP_BASE_URL + "/callback"
 
 SCOPES = "video.upload"  # Draft upload (แนะนำ)
-
 TOKEN_FILE = "tokens.json"
 
 AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
 TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
+
+# ===============================
+# TikTok URL Verification (Signature File)
+# TikTok บอกให้ upload ไปที่:
+# https://tiktik-app.onrender.com/terms/tiktokwLIttPrJS1EvAUJU8iWEmFkYExIP3soq.txt
+# ===============================
+TIKTOK_VERIFY_FILENAME = "tiktokwLIttPrJS1EvAUJU8iWEmFkYExIP3soq.txt"
+
+# ⚠️ เอา "เนื้อหาในไฟล์" ที่ TikTok ให้ มาใส่ตรงนี้แบบ EXACT (ห้ามมีเว้นวรรค/ขึ้นบรรทัดเกิน)
+TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=wLIttPrJS1EvAUJU8iWEmFkYExIP3soq"
+
 
 # ===============================
 # APP
@@ -44,13 +54,14 @@ def save_tokens(tokens):
 # -------------------------------
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return """
+    return f"""
     <h2>TikTok Minimal OAuth</h2>
     <ul>
       <li><a href="/login">Login with TikTok</a></li>
       <li><a href="/tokens">View Tokens</a></li>
       <li><a href="/terms">Terms</a></li>
       <li><a href="/privacy">Privacy</a></li>
+      <li><a href="/terms/{TIKTOK_VERIFY_FILENAME}">TikTok Verify File</a></li>
     </ul>
     """
 
@@ -72,6 +83,12 @@ def privacy():
         "Contact: you@example.com"
     )
 
+# ✅ TikTok signature file route (สำคัญสุดสำหรับ Verify URL)
+@app.get(f"/terms/{TIKTOK_VERIFY_FILENAME}", response_class=PlainTextResponse)
+def tiktok_verify_file():
+    # ต้องตรงเป๊ะตามไฟล์ที่ TikTok ให้ (ไม่มี HTML ไม่ต้องมี header อะไรเพิ่ม)
+    return TIKTOK_VERIFY_CONTENT
+
 @app.get("/login")
 def login():
     params = {
@@ -79,9 +96,9 @@ def login():
         "scope": SCOPES,
         "response_type": "code",
         "redirect_uri": REDIRECT_URI,
-        "state": "state123"
+        "state": "state123",
     }
-    q = "&".join([f"{k}={requests.utils.quote(v)}" for k, v in params.items()])
+    q = "&".join([f"{k}={requests.utils.quote(str(v))}" for k, v in params.items()])
     return RedirectResponse(f"{AUTH_URL}?{q}")
 
 @app.get("/callback", response_class=HTMLResponse)
@@ -95,14 +112,14 @@ def callback(request: Request):
         "client_secret": CLIENT_SECRET,
         "code": code,
         "grant_type": "authorization_code",
-        "redirect_uri": REDIRECT_URI
+        "redirect_uri": REDIRECT_URI,
     }
 
     r = requests.post(
         TOKEN_URL,
         data=data,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
-        timeout=60
+        timeout=60,
     )
     r.raise_for_status()
     token_json = r.json()
@@ -119,4 +136,5 @@ def callback(request: Request):
 
 @app.get("/tokens", response_class=HTMLResponse)
 def tokens():
-    return "<pre>" + json.dumps(load_tokens(), ensure_ascii=False, indent=2) + "</pre"
+    # ✅ fix closing </pre>
+    return "<pre>" + json.dumps(load_tokens(), ensure_ascii=False, indent=2) + "</pre>"
