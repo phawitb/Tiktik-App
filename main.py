@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse, HTMLResponse, PlainTextResponse
 
 # ===============================
-# CONFIG (ใส่ตรงนี้เลย)
+# CONFIG
 # ===============================
 CLIENT_KEY = "awuhdxqicla70byg"
 CLIENT_SECRET = "PTv0jbHJiGyo81XdNf8jGqsy5FmsB0YY"
@@ -13,22 +13,16 @@ CLIENT_SECRET = "PTv0jbHJiGyo81XdNf8jGqsy5FmsB0YY"
 APP_BASE_URL = "https://tiktik-app.onrender.com"
 REDIRECT_URI = APP_BASE_URL + "/callback"
 
-SCOPES = "video.upload"  # Draft upload (แนะนำ)
+SCOPES = "video.upload"  # Draft upload
 TOKEN_FILE = "tokens.json"
 
 AUTH_URL = "https://www.tiktok.com/v2/auth/authorize/"
 TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
 
 # ===============================
-# TikTok URL Verification (Signature File)
-# TikTok บอกให้ upload ไปที่:
-# https://tiktik-app.onrender.com/terms/tiktokwLIttPrJS1EvAUJU8iWEmFkYExIP3soq.txt
+# TikTok verification content
 # ===============================
-TIKTOK_VERIFY_FILENAME = "tiktokwLIttPrJS1EvAUJU8iWEmFkYExIP3soq.txt"
-
-# ⚠️ เอา "เนื้อหาในไฟล์" ที่ TikTok ให้ มาใส่ตรงนี้แบบ EXACT (ห้ามมีเว้นวรรค/ขึ้นบรรทัดเกิน)
 TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=J4r0wMu1TxBLLXJBn410CLDvoKx2KxJb"
-
 
 # ===============================
 # APP
@@ -52,27 +46,26 @@ def save_tokens(tokens):
 # -------------------------------
 # routes
 # -------------------------------
+
 @app.get("/", response_class=HTMLResponse)
 def home():
-    return f"""
+    return """
     <h2>TikTok Minimal OAuth</h2>
     <ul>
       <li><a href="/login">Login with TikTok</a></li>
       <li><a href="/tokens">View Tokens</a></li>
-      <li><a href="/terms">Terms</a></li>
-      <li><a href="/privacy">Privacy</a></li>
-      <li><a href="/terms/{TIKTOK_VERIFY_FILENAME}">TikTok Verify File</a></li>
     </ul>
     """
 
+# ✅ TikTok VERIFY PAGE (NO HTML, NO EXTRA TEXT)
 @app.get("/terms", response_class=PlainTextResponse)
-def terms():
-    return (
-        "Terms of Service\n\n"
-        "This application is used solely to authorize and upload video content "
-        "to TikTok on behalf of the user.\n\n"
-        "Contact: you@example.com"
-    )
+def terms_verify():
+    return TIKTOK_VERIFY_CONTENT
+
+# ✅ รองรับกรณี TikTok เรียก /terms/
+@app.get("/terms/", response_class=PlainTextResponse)
+def terms_verify_slash():
+    return TIKTOK_VERIFY_CONTENT
 
 @app.get("/privacy", response_class=PlainTextResponse)
 def privacy():
@@ -82,12 +75,6 @@ def privacy():
         "Authentication is handled by TikTok OAuth.\n\n"
         "Contact: you@example.com"
     )
-
-# ✅ TikTok signature file route (สำคัญสุดสำหรับ Verify URL)
-@app.get(f"/terms/{TIKTOK_VERIFY_FILENAME}/", response_class=PlainTextResponse)
-def tiktok_verify_file():
-    # ต้องตรงเป๊ะตามไฟล์ที่ TikTok ให้ (ไม่มี HTML ไม่ต้องมี header อะไรเพิ่ม)
-    return TIKTOK_VERIFY_CONTENT
 
 @app.get("/login")
 def login():
@@ -122,8 +109,8 @@ def callback(request: Request):
         timeout=60,
     )
     r.raise_for_status()
-    token_json = r.json()
 
+    token_json = r.json()
     tokens = load_tokens()
     tokens[str(int(time.time()))] = token_json
     save_tokens(tokens)
@@ -136,5 +123,4 @@ def callback(request: Request):
 
 @app.get("/tokens", response_class=HTMLResponse)
 def tokens():
-    # ✅ fix closing </pre>
     return "<pre>" + json.dumps(load_tokens(), ensure_ascii=False, indent=2) + "</pre>"
