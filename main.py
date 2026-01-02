@@ -27,7 +27,7 @@ TOKEN_URL = "https://open.tiktokapis.com/v2/oauth/token/"
 TIKTOK_VERIFY_FILENAME = "tiktokwLIttPrJS1EvAUJU8iWEmFkYExIP3soq.txt"
 
 # ⚠️ เอา "เนื้อหาในไฟล์" ที่ TikTok ให้ มาใส่ตรงนี้แบบ EXACT (ห้ามมีเว้นวรรค/ขึ้นบรรทัดเกิน)
-TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=wLIttPrJS1EvAUJU8iWEmFkYExIP3soq"
+TIKTOK_VERIFY_CONTENT = "tiktok-developers-site-verification=KlnxUsN93VOBSrnPvaq7sWCP5RJhkgGA"
 
 
 # ===============================
