@@ -84,7 +84,7 @@ def privacy():
     )
 
 # ✅ TikTok signature file route (สำคัญสุดสำหรับ Verify URL)
-@app.get(f"/terms/{TIKTOK_VERIFY_FILENAME}", response_class=PlainTextResponse)
+@app.get(f"/terms/{TIKTOK_VERIFY_FILENAME}/", response_class=PlainTextResponse)
 def tiktok_verify_file():
     # ต้องตรงเป๊ะตามไฟล์ที่ TikTok ให้ (ไม่มี HTML ไม่ต้องมี header อะไรเพิ่ม)
     return TIKTOK_VERIFY_CONTENT
